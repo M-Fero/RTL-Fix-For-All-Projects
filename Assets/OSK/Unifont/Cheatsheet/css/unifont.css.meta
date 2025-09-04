@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: a32e003342b5bf749aca8ca628337d32
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/Unifont/Cheatsheet/css/unifont.css
+  uploadId: 149807

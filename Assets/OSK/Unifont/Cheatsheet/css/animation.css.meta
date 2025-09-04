@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 5e4ff97bb2baf83498a209ee0be5daa5
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/Unifont/Cheatsheet/css/animation.css
+  uploadId: 149807

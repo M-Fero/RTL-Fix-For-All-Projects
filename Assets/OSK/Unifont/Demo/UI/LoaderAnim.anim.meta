@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: f49b50a90d123794a8da96c23c9ea187
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/Unifont/Demo/UI/LoaderAnim.anim
+  uploadId: 149807

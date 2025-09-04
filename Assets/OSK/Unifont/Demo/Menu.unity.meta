@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: d3b8c94f6b94bae46ab9396fd121d906
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/Unifont/Demo/Menu.unity
+  uploadId: 149807

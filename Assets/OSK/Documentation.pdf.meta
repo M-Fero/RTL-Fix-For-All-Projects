@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 387e584716b16d64193e0c5878a2519a
+timeCreated: 1480976686
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/Documentation.pdf
+  uploadId: 149807

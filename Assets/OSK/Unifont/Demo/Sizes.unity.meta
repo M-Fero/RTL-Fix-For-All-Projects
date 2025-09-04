@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: 4f48c5bef77fd7c44ad45e6189d9aac4
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/Unifont/Demo/Sizes.unity
+  uploadId: 149807

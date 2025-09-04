@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 83227e509c969304c9fdb845099db1b2
+timeCreated: 1480956304
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 77689
+  packageName: 'OSK: On Screen Keyboard'
+  packageVersion: 1.0
+  assetPath: Assets/OSK/UI/OSK.controller
+  uploadId: 149807

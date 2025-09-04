@@ -7,101 +7,6 @@ using UnityEngine.Events;
 using System.Collections.Generic;
 using UPersian.Components;
 
-#if UNITY_EDITOR
-using UnityEditor;
-
-[CustomEditor(typeof(Registration))]
-public class RegistrationEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        // Mark the object as dirty when modified
-        EditorGUI.BeginChangeCheck();
-
-        serializedObject.Update();
-
-        var modeProp = serializedObject.FindProperty("inputMode");
-        EditorGUILayout.PropertyField(modeProp);
-
-        Registration.InputMode selectedMode = (Registration.InputMode)modeProp.enumValueIndex;
-
-        // File Settings
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("File Settings", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("fileName"));
-
-        // UI Controls
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("UI Controls", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("saveButton"));
-
-        // Conditional Inputs
-        if (selectedMode == Registration.InputMode.Legacy)
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Legacy Input Fields", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("nameLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("mobileNumberLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("emailLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("companyNameLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("headOfficeLocationLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("projectNameLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("projectLocationLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("accountTypeDropdownLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("signatureLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("applicationTypeDropdownLegacy"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("salesCommentLegacy"));
-        }
-        else if (selectedMode == Registration.InputMode.TMPRO)
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("TMPRO Input Fields", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("nameTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("mobileNumberTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("emailTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("companyNameTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("headOfficeLocationTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("projectNameTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("projectLocationTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("accountTypeDropdownTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("signatureTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("applicationTypeDropdownTMP"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("salesCommentTMP"));
-        }
-        else if (selectedMode == Registration.InputMode.UPERSIANRTL)
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("UPersian RTL Input Fields", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("nameUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("mobileNumberUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("emailUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("companyNameUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("headOfficeLocationUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("projectNameUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("projectLocationUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("accountTypeDropdownUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("signatureUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("applicationTypeDropdownUPersianRTL"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("salesCommentUPersianRTL"));
-        }
-
-        // Events
-        EditorGUILayout.Space();
-        EditorGUILayout.LabelField("Events", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("SaveSuccessfullEvent"));
-
-        // Apply modifications
-        serializedObject.ApplyModifiedProperties();
-
-        // Mark scene as dirty if changes were made
-        if (EditorGUI.EndChangeCheck())
-        {
-            EditorUtility.SetDirty(target);
-        }
-    }
-}
-#endif
-
 // Registration data structure with expanded fields
 [System.Serializable]
 public class RegistrationData
@@ -122,13 +27,6 @@ public class RegistrationData
 
 public class Registration : MonoBehaviour
 {
-    public enum InputMode
-    {
-        Legacy,
-        TMPRO,
-        UPERSIANRTL
-    }
-
     public static Registration Instance { get; private set; }
 
     [Header("File Settings")]
@@ -137,58 +35,9 @@ public class Registration : MonoBehaviour
 
     // Public property to access fileName
     public string FileName => fileName;
-
-    [Header("Input Mode")]
-    [Tooltip("Choose which input system to use: Legacy, TMPRO, or UPersian RTL.")]
-    [SerializeField] private InputMode inputMode = InputMode.Legacy;
-
-    [Header("Legacy Input Fields")]
-    [Tooltip("Legacy UI InputField for Name.")]
-    [SerializeField] private InputField nameLegacy;
-    [Tooltip("Legacy UI InputField for Mobile Number.")]
-    [SerializeField] private InputField mobileNumberLegacy;
-    [Tooltip("Legacy UI InputField for Email.")]
-    [SerializeField] private InputField emailLegacy;
-    [Tooltip("Legacy UI InputField for Company Name.")]
-    [SerializeField] private InputField companyNameLegacy;
-    [Tooltip("Legacy UI InputField for Head Office Location.")]
-    [SerializeField] private InputField headOfficeLocationLegacy;
-    [Tooltip("Legacy UI InputField for Project Name.")]
-    [SerializeField] private InputField projectNameLegacy;
-    [Tooltip("Legacy UI InputField for Project Location.")]
-    [SerializeField] private InputField projectLocationLegacy;
-    [Tooltip("Legacy UI Dropdown for Account Type.")]
-    [SerializeField] private Dropdown accountTypeDropdownLegacy;
-    [Tooltip("Legacy UI InputField for Signature.")]
-    [SerializeField] private InputField signatureLegacy;
-    [Tooltip("Legacy UI Dropdown for Application Type.")]
-    [SerializeField] private Dropdown applicationTypeDropdownLegacy;
-    [Tooltip("Legacy UI InputField for Sales Comment.")]
-    [SerializeField] private InputField salesCommentLegacy;
-
-    [Header("TMPRO Input Fields")]
-    [Tooltip("TMPRO InputField for Name.")]
-    [SerializeField] private TMP_InputField nameTMP;
-    [Tooltip("TMPRO InputField for Mobile Number.")]
-    [SerializeField] private TMP_InputField mobileNumberTMP;
-    [Tooltip("TMPRO InputField for Email.")]
-    [SerializeField] private TMP_InputField emailTMP;
-    [Tooltip("TMPRO InputField for Company Name.")]
-    [SerializeField] private TMP_InputField companyNameTMP;
-    [Tooltip("TMPRO InputField for Head Office Location.")]
-    [SerializeField] private TMP_InputField headOfficeLocationTMP;
-    [Tooltip("TMPRO InputField for Project Name.")]
-    [SerializeField] private TMP_InputField projectNameTMP;
-    [Tooltip("TMPRO InputField for Project Location.")]
-    [SerializeField] private TMP_InputField projectLocationTMP;
-    [Tooltip("TMPRO Dropdown for Account Type.")]
-    [SerializeField] private TMP_Dropdown accountTypeDropdownTMP;
-    [Tooltip("TMPRO InputField for Signature.")]
-    [SerializeField] private TMP_InputField signatureTMP;
-    [Tooltip("TMPRO Dropdown for Application Type.")]
-    [SerializeField] private TMP_Dropdown applicationTypeDropdownTMP;
-    [Tooltip("TMPRO InputField for Sales Comment.")]
-    [SerializeField] private TMP_InputField salesCommentTMP;
+    
+    // Public property to access full file path
+    public string FilePath => filePath;
 
     [Header("UPersian RTL Input Fields")]
     [Tooltip("UPersian RTL TMP InputField for Name (Auto RTL/LTR detection).")]
@@ -214,6 +63,28 @@ public class Registration : MonoBehaviour
     [Tooltip("UPersian RTL TMP InputField for Sales Comment (Auto RTL/LTR detection).")]
     [SerializeField] private TMP_InputField salesCommentUPersianRTL;
 
+    [Header("Required Field Warning Labels")]
+    [Tooltip("TextMeshPro component to show 'This field is required' for Name field.")]
+    [SerializeField] private TextMeshProUGUI nameRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Mobile Number field.")]
+    [SerializeField] private TextMeshProUGUI mobileNumberRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Email field.")]
+    [SerializeField] private TextMeshProUGUI emailRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Company Name field.")]
+    [SerializeField] private TextMeshProUGUI companyNameRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Head Office Location field.")]
+    [SerializeField] private TextMeshProUGUI headOfficeLocationRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Project Name field.")]
+    [SerializeField] private TextMeshProUGUI projectNameRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Project Location field.")]
+    [SerializeField] private TextMeshProUGUI projectLocationRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Account Type field.")]
+    [SerializeField] private TextMeshProUGUI accountTypeRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Signature field.")]
+    [SerializeField] private TextMeshProUGUI signatureRequiredLabel;
+    [Tooltip("TextMeshPro component to show 'This field is required' for Application Type field.")]
+    [SerializeField] private TextMeshProUGUI applicationTypeRequiredLabel;
+
     [Header("Save Events")]
     [Tooltip("Event triggered when registration is saved successfully.")]
     [SerializeField]
@@ -225,6 +96,12 @@ public class Registration : MonoBehaviour
 
     private string filePath;
     private const string CSV_HEADER = "Name,Mobile_Number,Email,Company_Name,Head_Office_Location,Project_Name,Project_Location,Account_Type,Signature,Application_Type,Sales_Comment";
+
+    // Helper method to get current timestamp in consistent format
+    private string GetTimestamp()
+    {
+        return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
 
     private void Awake()
     {
@@ -240,8 +117,12 @@ public class Registration : MonoBehaviour
 
     private void Start()
     {
-        filePath = Path.Combine(Application.dataPath, fileName);
+        // Use dataPath for file location
+        filePath = Application.dataPath + "/" + fileName;
         InitializeFile();
+
+        // Validate RTL setup
+        ValidateRTLSetup();
 
         // Connect the save button to the SaveButton method
         if (saveButton != null)
@@ -255,16 +136,137 @@ public class Registration : MonoBehaviour
         }
     }
 
+    // Validate that RTL components are properly set up
+    private void ValidateRTLSetup()
+    {
+        var missingFields = new List<string>();
+        
+        if (nameUPersianRTL == null) missingFields.Add("Name");
+        if (mobileNumberUPersianRTL == null) missingFields.Add("Mobile Number");
+        if (emailUPersianRTL == null) missingFields.Add("Email");
+        if (companyNameUPersianRTL == null) missingFields.Add("Company Name");
+        if (headOfficeLocationUPersianRTL == null) missingFields.Add("Head Office Location");
+        if (projectNameUPersianRTL == null) missingFields.Add("Project Name");
+        if (projectLocationUPersianRTL == null) missingFields.Add("Project Location");
+        if (accountTypeDropdownUPersianRTL == null) missingFields.Add("Account Type Dropdown");
+        if (signatureUPersianRTL == null) missingFields.Add("Signature");
+        if (applicationTypeDropdownUPersianRTL == null) missingFields.Add("Application Type Dropdown");
+        if (salesCommentUPersianRTL == null) missingFields.Add("Sales Comment");
+        
+        if (missingFields.Count > 0)
+        {
+            Debug.LogWarning($"Missing RTL field assignments: {string.Join(", ", missingFields)}");
+        }
+        else
+        {
+            Debug.Log("All RTL input fields are properly assigned.");
+        }
+
+        // Initialize required field labels
+        InitializeRequiredFieldLabels();
+    }
+
+    // Initialize required field warning labels
+    private void InitializeRequiredFieldLabels()
+    {
+        const string requiredText = "This field is required";
+        Color warningColor = Color.red;
+
+        // Initialize each label if it exists
+        if (nameRequiredLabel != null)
+        {
+            nameRequiredLabel.text = requiredText;
+            nameRequiredLabel.color = warningColor;
+            nameRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (mobileNumberRequiredLabel != null)
+        {
+            mobileNumberRequiredLabel.text = requiredText;
+            mobileNumberRequiredLabel.color = warningColor;
+            mobileNumberRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (emailRequiredLabel != null)
+        {
+            emailRequiredLabel.text = requiredText;
+            emailRequiredLabel.color = warningColor;
+            emailRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (companyNameRequiredLabel != null)
+        {
+            companyNameRequiredLabel.text = requiredText;
+            companyNameRequiredLabel.color = warningColor;
+            companyNameRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (headOfficeLocationRequiredLabel != null)
+        {
+            headOfficeLocationRequiredLabel.text = requiredText;
+            headOfficeLocationRequiredLabel.color = warningColor;
+            headOfficeLocationRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (projectNameRequiredLabel != null)
+        {
+            projectNameRequiredLabel.text = requiredText;
+            projectNameRequiredLabel.color = warningColor;
+            projectNameRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (projectLocationRequiredLabel != null)
+        {
+            projectLocationRequiredLabel.text = requiredText;
+            projectLocationRequiredLabel.color = warningColor;
+            projectLocationRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (accountTypeRequiredLabel != null)
+        {
+            accountTypeRequiredLabel.text = requiredText;
+            accountTypeRequiredLabel.color = warningColor;
+            accountTypeRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (signatureRequiredLabel != null)
+        {
+            signatureRequiredLabel.text = requiredText;
+            signatureRequiredLabel.color = warningColor;
+            signatureRequiredLabel.gameObject.SetActive(false);
+        }
+
+        if (applicationTypeRequiredLabel != null)
+        {
+            applicationTypeRequiredLabel.text = requiredText;
+            applicationTypeRequiredLabel.color = warningColor;
+            applicationTypeRequiredLabel.gameObject.SetActive(false);
+        }
+    }
+
     private void InitializeFile()
     {
         try
         {
+            // Ensure the directory exists
+            string directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                Debug.Log($"Created directory: {directory}");
+            }
+
             if (!File.Exists(filePath))
             {
                 using (StreamWriter writer = File.CreateText(filePath))
                 {
                     writer.WriteLine(CSV_HEADER);
                 }
+                Debug.Log($"Created new CSV file: {filePath}");
+            }
+            else
+            {
+                Debug.Log($"Using existing CSV file: {filePath}");
             }
         }
         catch (Exception ex)
@@ -277,86 +279,29 @@ public class Registration : MonoBehaviour
     {
         try
         {
-            switch (inputMode)
+            if (nameUPersianRTL == null || mobileNumberUPersianRTL == null || emailUPersianRTL == null || 
+                companyNameUPersianRTL == null || headOfficeLocationUPersianRTL == null || 
+                projectNameUPersianRTL == null || projectLocationUPersianRTL == null || accountTypeDropdownUPersianRTL == null ||
+                signatureUPersianRTL == null || applicationTypeDropdownUPersianRTL == null || salesCommentUPersianRTL == null)
             {
-                case InputMode.TMPRO:
-                    if (nameTMP == null || mobileNumberTMP == null || emailTMP == null || 
-                        companyNameTMP == null || headOfficeLocationTMP == null || 
-                        projectNameTMP == null || projectLocationTMP == null || accountTypeDropdownTMP == null ||
-                        signatureTMP == null || applicationTypeDropdownTMP == null || salesCommentTMP == null)
-                    {
-                        throw new InvalidOperationException("One or more TMPRO Input fields are not assigned.");
-                    }
-
-                    return new RegistrationData
-                    {
-                        name = nameTMP.text?.Trim() ?? "",
-                        mobile_number = mobileNumberTMP.text?.Trim() ?? "",
-                        email = emailTMP.text?.Trim() ?? "",
-                        company_name = companyNameTMP.text?.Trim() ?? "",
-                        head_office_location = headOfficeLocationTMP.text?.Trim() ?? "",
-                        project_name = projectNameTMP.text?.Trim() ?? "",
-                        project_location = projectLocationTMP.text?.Trim() ?? "",
-                        account_type = GetSelectedAccountType(accountTypeDropdownTMP),
-                        signature = signatureTMP.text?.Trim() ?? "",
-                        application_type = GetSelectedApplicationType(applicationTypeDropdownTMP),
-                        sales_comment = salesCommentTMP.text?.Trim() ?? "",
-                        timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                    };
-
-                case InputMode.UPERSIANRTL:
-                    if (nameUPersianRTL == null || mobileNumberUPersianRTL == null || emailUPersianRTL == null || 
-                        companyNameUPersianRTL == null || headOfficeLocationUPersianRTL == null || 
-                        projectNameUPersianRTL == null || projectLocationUPersianRTL == null || accountTypeDropdownUPersianRTL == null ||
-                        signatureUPersianRTL == null || applicationTypeDropdownUPersianRTL == null || salesCommentUPersianRTL == null)
-                    {
-                        throw new InvalidOperationException("One or more UPersian RTL Input fields are not assigned.");
-                    }
-
-                    return new RegistrationData
-                    {
-                        name = GetRtlSafeText(nameUPersianRTL),
-                        mobile_number = mobileNumberUPersianRTL.text?.Trim() ?? "",
-                        email = emailUPersianRTL.text?.Trim() ?? "",
-                        company_name = GetRtlSafeText(companyNameUPersianRTL),
-                        head_office_location = GetRtlSafeText(headOfficeLocationUPersianRTL),
-                        project_name = GetRtlSafeText(projectNameUPersianRTL),
-                        project_location = GetRtlSafeText(projectLocationUPersianRTL),
-                        account_type = GetSelectedAccountType(accountTypeDropdownUPersianRTL),
-                        signature = GetRtlSafeText(signatureUPersianRTL),
-                        application_type = GetSelectedApplicationType(applicationTypeDropdownUPersianRTL),
-                        sales_comment = GetRtlSafeText(salesCommentUPersianRTL),
-                        timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                    };
-
-                case InputMode.Legacy:
-                    if (nameLegacy == null || mobileNumberLegacy == null || emailLegacy == null || 
-                        companyNameLegacy == null || headOfficeLocationLegacy == null || 
-                        projectNameLegacy == null || projectLocationLegacy == null || accountTypeDropdownLegacy == null ||
-                        signatureLegacy == null || applicationTypeDropdownLegacy == null || salesCommentLegacy == null)
-                    {
-                        throw new InvalidOperationException("One or more Legacy Input fields are not assigned.");
-                    }
-
-                    return new RegistrationData
-                    {
-                        name = nameLegacy.text?.Trim() ?? "",
-                        mobile_number = mobileNumberLegacy.text?.Trim() ?? "",
-                        email = emailLegacy.text?.Trim() ?? "",
-                        company_name = companyNameLegacy.text?.Trim() ?? "",
-                        head_office_location = headOfficeLocationLegacy.text?.Trim() ?? "",
-                        project_name = projectNameLegacy.text?.Trim() ?? "",
-                        project_location = projectLocationLegacy.text?.Trim() ?? "",
-                        account_type = GetSelectedAccountType(accountTypeDropdownLegacy),
-                        signature = signatureLegacy.text?.Trim() ?? "",
-                        application_type = GetSelectedApplicationType(applicationTypeDropdownLegacy),
-                        sales_comment = salesCommentLegacy.text?.Trim() ?? "",
-                        timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                    };
-
-                default:
-                    throw new InvalidOperationException("Invalid input mode.");
+                throw new InvalidOperationException("One or more UPersian RTL Input fields are not assigned.");
             }
+
+            return new RegistrationData
+            {
+                name = GetRtlSafeText(nameUPersianRTL),
+                mobile_number = GetRtlSafeText(mobileNumberUPersianRTL),
+                email = GetRtlSafeText(emailUPersianRTL),
+                company_name = GetRtlSafeText(companyNameUPersianRTL),
+                head_office_location = GetRtlSafeText(headOfficeLocationUPersianRTL),
+                project_name = GetRtlSafeText(projectNameUPersianRTL),
+                project_location = GetRtlSafeText(projectLocationUPersianRTL),
+                account_type = GetSelectedAccountType(accountTypeDropdownUPersianRTL),
+                signature = GetRtlSafeText(signatureUPersianRTL),
+                application_type = GetSelectedApplicationType(applicationTypeDropdownUPersianRTL),
+                sales_comment = GetRtlSafeText(salesCommentUPersianRTL),
+                timestamp = GetTimestamp()
+            };
         }
         catch (Exception ex)
         {
@@ -370,33 +315,33 @@ public class Registration : MonoBehaviour
     {
         if (inputField == null) return "";
         
-        // Get the text component that has RtlText attached
-        var textComponent = inputField.transform.GetChild(2)?.GetComponent<RtlText>();
-        if (textComponent != null)
+        try
         {
-            // Use BaseText to get the original text without RTL processing
-            return textComponent.BaseText?.Trim() ?? "";
+            // First try to get the RtlText component from the text component itself
+            var rtlTextComponent = inputField.textComponent?.GetComponent<RtlText>();
+            if (rtlTextComponent != null)
+            {
+                return rtlTextComponent.BaseText?.Trim() ?? "";
+            }
+            
+            // Alternative: Try to find RtlText in child objects (common UPersian setup)
+            var textComponent = inputField.transform.GetChild(2)?.GetComponent<RtlText>();
+            if (textComponent != null)
+            {
+                return textComponent.BaseText?.Trim() ?? "";
+            }
+            
+            // Final fallback: use regular text if RtlText component is not found
+            return inputField.text?.Trim() ?? "";
         }
-        
-        // Fallback to regular text if RtlText component is not found
-        return inputField.text?.Trim() ?? "";
-    }
-
-    private string GetSelectedAccountType(Dropdown dropdown)
-    {
-        if (dropdown == null || dropdown.options == null || dropdown.value < 0 || dropdown.value >= dropdown.options.Count)
-            return "";
-        return dropdown.options[dropdown.value].text;
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"Failed to extract RTL text from {inputField.name}: {ex.Message}. Using fallback.");
+            return inputField.text?.Trim() ?? "";
+        }
     }
 
     private string GetSelectedAccountType(TMP_Dropdown dropdown)
-    {
-        if (dropdown == null || dropdown.options == null || dropdown.value < 0 || dropdown.value >= dropdown.options.Count)
-            return "";
-        return dropdown.options[dropdown.value].text;
-    }
-
-    private string GetSelectedApplicationType(Dropdown dropdown)
     {
         if (dropdown == null || dropdown.options == null || dropdown.value < 0 || dropdown.value >= dropdown.options.Count)
             return "";
@@ -424,30 +369,20 @@ public class Registration : MonoBehaviour
 
             // Step 2: Get and validate registration data
             RegistrationData data = GetCurrentInputs();
-            
+
             // Additional validation for required fields
-            if (string.IsNullOrEmpty(data.name) || string.IsNullOrEmpty(data.mobile_number))
+            if (string.IsNullOrEmpty(data.name) || string.IsNullOrEmpty(data.mobile_number) ||
+                string.IsNullOrEmpty(data.email) || string.IsNullOrEmpty(data.company_name) ||
+                string.IsNullOrEmpty(data.head_office_location) || string.IsNullOrEmpty(data.project_name) ||
+                string.IsNullOrEmpty(data.project_location) || string.IsNullOrEmpty(data.account_type) ||
+                string.IsNullOrEmpty(data.signature) || string.IsNullOrEmpty(data.application_type))
             {
-                Debug.LogWarning("Name and mobile number are required fields and cannot be empty.");
-                return;
-            }
-
-            // Step 3: Check for duplicate mobile number
-            if (IsMobileExists(data.mobile_number))
-            {
-                Debug.LogWarning($"Mobile number {data.mobile_number} already exists in the database.");
-                return;
-            }
-
-            // Step 4: Check for duplicate email if provided
-            if (!string.IsNullOrEmpty(data.email) && IsEmailExists(data.email))
-            {
-                Debug.LogWarning($"Email {data.email} already exists in the database.");
+                Debug.LogWarning("All required fields must be filled. Sales comment is optional.");
                 return;
             }
 
             // Step 5: Save the registration data
-            string csvLine = $"{EscapeCsvField(data.name)},{EscapeCsvField(data.mobile_number)},{EscapeCsvField(data.email)},{EscapeCsvField(data.company_name)},{EscapeCsvField(data.head_office_location)},{EscapeCsvField(data.project_name)},{EscapeCsvField(data.project_location)},{EscapeCsvField(data.account_type)},{EscapeCsvField(data.signature)},{EscapeCsvField(data.application_type)},{EscapeCsvField(data.sales_comment)}";
+            string csvLine = $"{EscapeCsvField(data.name)},{EscapeCsvField(data.mobile_number)},{EscapeCsvField(data.email)},{EscapeCsvField(data.company_name)},{EscapeCsvField(data.head_office_location)},{EscapeCsvField(data.project_name)},{EscapeCsvField(data.project_location)},{EscapeCsvField(data.account_type)},{EscapeCsvField(data.signature)},{EscapeCsvField(data.application_type)},{EscapeCsvField(ProcessSalesComment(data.sales_comment))}";
             
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
@@ -482,7 +417,7 @@ public class Registration : MonoBehaviour
                 return;
             }
 
-            string csvLine = $"{EscapeCsvField(data.name)},{EscapeCsvField(data.mobile_number)},{EscapeCsvField(data.email)},{EscapeCsvField(data.company_name)},{EscapeCsvField(data.head_office_location)},{EscapeCsvField(data.project_name)},{EscapeCsvField(data.project_location)},{EscapeCsvField(data.account_type)},{EscapeCsvField(data.signature)},{EscapeCsvField(data.application_type)},{EscapeCsvField(data.sales_comment)}";
+            string csvLine = $"{EscapeCsvField(data.name)},{EscapeCsvField(data.mobile_number)},{EscapeCsvField(data.email)},{EscapeCsvField(data.company_name)},{EscapeCsvField(data.head_office_location)},{EscapeCsvField(data.project_name)},{EscapeCsvField(data.project_location)},{EscapeCsvField(data.account_type)},{EscapeCsvField(data.signature)},{EscapeCsvField(data.application_type)},{EscapeCsvField(ProcessSalesComment(data.sales_comment))}";
             
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
@@ -507,7 +442,7 @@ public class Registration : MonoBehaviour
 
         try
         {
-            string csvLine = $"{EscapeCsvField(data.name)},{EscapeCsvField(data.mobile_number)},{EscapeCsvField(data.email)},{EscapeCsvField(data.company_name)},{EscapeCsvField(data.head_office_location)},{EscapeCsvField(data.project_name)},{EscapeCsvField(data.project_location)},{EscapeCsvField(data.account_type)},{EscapeCsvField(data.signature)},{EscapeCsvField(data.application_type)},{EscapeCsvField(data.sales_comment)}";
+            string csvLine = $"{EscapeCsvField(data.name)},{EscapeCsvField(data.mobile_number)},{EscapeCsvField(data.email)},{EscapeCsvField(data.company_name)},{EscapeCsvField(data.head_office_location)},{EscapeCsvField(data.project_name)},{EscapeCsvField(data.project_location)},{EscapeCsvField(data.account_type)},{EscapeCsvField(data.signature)},{EscapeCsvField(data.application_type)},{EscapeCsvField(ProcessSalesComment(data.sales_comment))}";
             
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
@@ -536,7 +471,7 @@ public class Registration : MonoBehaviour
             signature = "",
             application_type = "",
             sales_comment = "",
-            timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            timestamp = GetTimestamp()
         };
         SaveRegistrationData(data);
     }
@@ -637,10 +572,16 @@ public class Registration : MonoBehaviour
         return field;
     }
 
+    // Helper method to handle sales comment field - returns "Null" if empty
+    private string ProcessSalesComment(string salesComment)
+    {
+        return string.IsNullOrEmpty(salesComment?.Trim()) ? "Null" : salesComment.Trim();
+    }
+
     // Helper method to parse CSV lines properly handling escaped fields
     private List<string> ParseCsvLine(string line)
     {
-        List<string> fields = new List<string>();
+        List<String> fields = new List<string>();
         bool inQuotes = false;
         string currentField = "";
 
@@ -695,7 +636,7 @@ public class Registration : MonoBehaviour
                     if (isFirstLine) { isFirstLine = false; continue; }
                     
                     var parts = ParseCsvLine(line);
-                    if (parts.Count >= 11) // 11 fields now
+                    if (parts.Count >= 11) // 11 fields now (no timestamp)
                     {
                         registrations.Add(new RegistrationData
                         {
@@ -710,7 +651,7 @@ public class Registration : MonoBehaviour
                             signature = parts[8].Trim(),
                             application_type = parts[9].Trim(),
                             sales_comment = parts[10].Trim(),
-                            timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                            timestamp = GetTimestamp() // Keep timestamp in object for internal use, but don't save to CSV
                         });
                     }
                 }
@@ -743,8 +684,8 @@ public class Registration : MonoBehaviour
     {
         if (data == null) return "";
         
-        // Convert to raw data format for API: all 11 fields separated by commas
-        return $"{data.name},{data.mobile_number},{data.email},{data.company_name},{data.head_office_location},{data.project_name},{data.project_location},{data.account_type},{data.signature},{data.application_type},{data.sales_comment}";
+        // Convert to raw data format for API: all 11 fields separated by commas (no timestamp)
+        return $"{data.name},{data.mobile_number},{data.email},{data.company_name},{data.head_office_location},{data.project_name},{data.project_location},{data.account_type},{data.signature},{data.application_type},{ProcessSalesComment(data.sales_comment)}";
     }
 
     public int GetRegistrationCount()
@@ -752,55 +693,39 @@ public class Registration : MonoBehaviour
         return GetAllRegistrationsAsObjects().Count;
     }
 
+    // Get summary of current data for debugging
+    public string GetDataSummary()
+    {
+        try
+        {
+            var registrations = GetAllRegistrationsAsObjects();
+            return $"Total registrations: {registrations.Count}\nFile path: {filePath}\nFile exists: {File.Exists(filePath)}";
+        }
+        catch (Exception ex)
+        {
+            return $"Error getting summary: {ex.Message}";
+        }
+    }
+
     // Clear all input fields
     public void ClearAllInputs()
     {
         try
         {
-            switch (inputMode)
-            {
-                case InputMode.TMPRO:
-                    if (nameTMP != null) nameTMP.text = "";
-                    if (mobileNumberTMP != null) mobileNumberTMP.text = "";
-                    if (emailTMP != null) emailTMP.text = "";
-                    if (companyNameTMP != null) companyNameTMP.text = "";
-                    if (headOfficeLocationTMP != null) headOfficeLocationTMP.text = "";
-                    if (projectNameTMP != null) projectNameTMP.text = "";
-                    if (projectLocationTMP != null) projectLocationTMP.text = "";
-                    if (accountTypeDropdownTMP != null) accountTypeDropdownTMP.value = 0;
-                    if (signatureTMP != null) signatureTMP.text = "";
-                    if (applicationTypeDropdownTMP != null) applicationTypeDropdownTMP.value = 0;
-                    if (salesCommentTMP != null) salesCommentTMP.text = "";
-                    break;
+            if (nameUPersianRTL != null) nameUPersianRTL.text = "";
+            if (mobileNumberUPersianRTL != null) mobileNumberUPersianRTL.text = "";
+            if (emailUPersianRTL != null) emailUPersianRTL.text = "";
+            if (companyNameUPersianRTL != null) companyNameUPersianRTL.text = "";
+            if (headOfficeLocationUPersianRTL != null) headOfficeLocationUPersianRTL.text = "";
+            if (projectNameUPersianRTL != null) projectNameUPersianRTL.text = "";
+            if (projectLocationUPersianRTL != null) projectLocationUPersianRTL.text = "";
+            if (accountTypeDropdownUPersianRTL != null) accountTypeDropdownUPersianRTL.value = 0;
+            if (signatureUPersianRTL != null) signatureUPersianRTL.text = "";
+            if (applicationTypeDropdownUPersianRTL != null) applicationTypeDropdownUPersianRTL.value = 0;
+            if (salesCommentUPersianRTL != null) salesCommentUPersianRTL.text = "";
 
-                case InputMode.UPERSIANRTL:
-                    if (nameUPersianRTL != null) nameUPersianRTL.text = "";
-                    if (mobileNumberUPersianRTL != null) mobileNumberUPersianRTL.text = "";
-                    if (emailUPersianRTL != null) emailUPersianRTL.text = "";
-                    if (companyNameUPersianRTL != null) companyNameUPersianRTL.text = "";
-                    if (headOfficeLocationUPersianRTL != null) headOfficeLocationUPersianRTL.text = "";
-                    if (projectNameUPersianRTL != null) projectNameUPersianRTL.text = "";
-                    if (projectLocationUPersianRTL != null) projectLocationUPersianRTL.text = "";
-                    if (accountTypeDropdownUPersianRTL != null) accountTypeDropdownUPersianRTL.value = 0;
-                    if (signatureUPersianRTL != null) signatureUPersianRTL.text = "";
-                    if (applicationTypeDropdownUPersianRTL != null) applicationTypeDropdownUPersianRTL.value = 0;
-                    if (salesCommentUPersianRTL != null) salesCommentUPersianRTL.text = "";
-                    break;
-
-                case InputMode.Legacy:
-                    if (nameLegacy != null) nameLegacy.text = "";
-                    if (mobileNumberLegacy != null) mobileNumberLegacy.text = "";
-                    if (emailLegacy != null) emailLegacy.text = "";
-                    if (companyNameLegacy != null) companyNameLegacy.text = "";
-                    if (headOfficeLocationLegacy != null) headOfficeLocationLegacy.text = "";
-                    if (projectNameLegacy != null) projectNameLegacy.text = "";
-                    if (projectLocationLegacy != null) projectLocationLegacy.text = "";
-                    if (accountTypeDropdownLegacy != null) accountTypeDropdownLegacy.value = 0;
-                    if (signatureLegacy != null) signatureLegacy.text = "";
-                    if (applicationTypeDropdownLegacy != null) applicationTypeDropdownLegacy.value = 0;
-                    if (salesCommentLegacy != null) salesCommentLegacy.text = "";
-                    break;
-            }
+            // Hide all required field labels when clearing inputs
+            HideAllRequiredLabels();
         }
         catch (Exception ex)
         {
@@ -814,76 +739,99 @@ public class Registration : MonoBehaviour
         try
         {
             RegistrationData data = GetCurrentInputs();
+            bool isValid = true;
+
+            // Hide all warning labels first
+            HideAllRequiredLabels();
             
-            // Check if all required fields are empty (Sales Comment is optional)
+            // Check required fields (Sales Comment is optional)
             if (string.IsNullOrEmpty(data.name))
             {
                 Debug.LogWarning("Name is required.");
-                return false;
+                ShowRequiredLabel(nameRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.mobile_number))
             {
                 Debug.LogWarning("Mobile number is required.");
-                return false;
+                ShowRequiredLabel(mobileNumberRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.email))
             {
                 Debug.LogWarning("Email is required.");
-                return false;
+                ShowRequiredLabel(emailRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.company_name))
             {
                 Debug.LogWarning("Company name is required.");
-                return false;
+                ShowRequiredLabel(companyNameRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.head_office_location))
             {
                 Debug.LogWarning("Head office location is required.");
-                return false;
+                ShowRequiredLabel(headOfficeLocationRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.project_name))
             {
                 Debug.LogWarning("Project name is required.");
-                return false;
+                ShowRequiredLabel(projectNameRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.project_location))
             {
                 Debug.LogWarning("Project location is required.");
-                return false;
+                ShowRequiredLabel(projectLocationRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.account_type))
             {
-                Debug.LogWarning("Account type is required.");
-                return false;
+                Debug.LogWarning("Account type must be selected.");
+                ShowRequiredLabel(accountTypeRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.signature))
             {
                 Debug.LogWarning("Signature is required.");
-                return false;
+                ShowRequiredLabel(signatureRequiredLabel);
+                isValid = false;
             }
             
             if (string.IsNullOrEmpty(data.application_type))
             {
-                Debug.LogWarning("Application type is required.");
-                return false;
+                Debug.LogWarning("Application type must be selected.");
+                ShowRequiredLabel(applicationTypeRequiredLabel);
+                isValid = false;
             }
             
-            // Email format validation if provided
+            // Email format validation
             if (!string.IsNullOrEmpty(data.email) && !IsValidEmail(data.email))
             {
                 Debug.LogWarning("Invalid email format.");
-                return false;
+                ShowRequiredLabel(emailRequiredLabel, "Invalid email format");
+                isValid = false;
             }
             
-            return true;
+            // Mobile number basic validation (should contain only digits and common characters)
+            if (!string.IsNullOrEmpty(data.mobile_number) && !IsValidMobileNumber(data.mobile_number))
+            {
+                Debug.LogWarning("Invalid mobile number format.");
+                ShowRequiredLabel(mobileNumberRequiredLabel, "Invalid mobile number format");
+                isValid = false;
+            }
+            
+            return isValid;
         }
         catch (Exception ex)
         {
@@ -892,6 +840,39 @@ public class Registration : MonoBehaviour
         }
     }
 
+    // Helper method to show a required field label
+    private void ShowRequiredLabel(TextMeshProUGUI label, string customMessage = null)
+    {
+        if (label != null)
+        {
+            if (!string.IsNullOrEmpty(customMessage))
+            {
+                label.text = customMessage;
+            }
+            else
+            {
+                label.text = "This field is required";
+            }
+            label.gameObject.SetActive(true);
+        }
+    }
+
+    // Helper method to hide all required field labels
+    private void HideAllRequiredLabels()
+    {
+        if (nameRequiredLabel != null) nameRequiredLabel.gameObject.SetActive(false);
+        if (mobileNumberRequiredLabel != null) mobileNumberRequiredLabel.gameObject.SetActive(false);
+        if (emailRequiredLabel != null) emailRequiredLabel.gameObject.SetActive(false);
+        if (companyNameRequiredLabel != null) companyNameRequiredLabel.gameObject.SetActive(false);
+        if (headOfficeLocationRequiredLabel != null) headOfficeLocationRequiredLabel.gameObject.SetActive(false);
+        if (projectNameRequiredLabel != null) projectNameRequiredLabel.gameObject.SetActive(false);
+        if (projectLocationRequiredLabel != null) projectLocationRequiredLabel.gameObject.SetActive(false);
+        if (accountTypeRequiredLabel != null) accountTypeRequiredLabel.gameObject.SetActive(false);
+        if (signatureRequiredLabel != null) signatureRequiredLabel.gameObject.SetActive(false);
+        if (applicationTypeRequiredLabel != null) applicationTypeRequiredLabel.gameObject.SetActive(false);
+    }
+
+    // Email validation method
     private bool IsValidEmail(string email)
     {
         try
@@ -905,8 +886,22 @@ public class Registration : MonoBehaviour
         }
     }
 
+    // Mobile number validation method
+    private bool IsValidMobileNumber(string mobile)
+    {
+        if (string.IsNullOrEmpty(mobile))
+            return false;
+            
+        // Allow digits, spaces, hyphens, parentheses, and plus sign
+        return System.Text.RegularExpressions.Regex.IsMatch(mobile, @"^[\d\s\-\(\)\+]+$") && mobile.Length >= 7;
+    }
+
     private void OnDestroy()
     {
-        // No need to close registrationWriter since we're not using it anymore
+        // Cleanup: remove listener from button to prevent memory leaks
+        if (saveButton != null)
+        {
+            saveButton.onClick.RemoveListener(SaveButton);
+        }
     }
 }

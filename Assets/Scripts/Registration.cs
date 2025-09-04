@@ -135,6 +135,27 @@ public class Registration : MonoBehaviour
             Debug.LogWarning("Save button is not assigned in the inspector.");
         }
     }
+    public void ReSetupTheFile()
+    {
+        // Use dataPath for file location
+        filePath = Application.dataPath + "/" + fileName;
+        InitializeFile();
+
+        // Validate RTL setup
+        ValidateRTLSetup();
+
+        // Connect the save button to the SaveButton method
+        if (saveButton != null)
+        {
+            saveButton.onClick.RemoveListener(SaveButton); // Remove existing
+            saveButton.onClick.AddListener(SaveButton);    // Add new
+            Debug.Log("Save button connected to SaveButton method.");
+        }
+        else
+        {
+            Debug.LogWarning("Save button is not assigned in the inspector.");
+        }
+    }
 
     // Validate that RTL components are properly set up
     private void ValidateRTLSetup()

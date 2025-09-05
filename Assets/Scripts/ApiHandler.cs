@@ -9,37 +9,37 @@ using System.IO;
 using System.Text;
 using System.Linq;
 
-[System.Serializable]
-public class ContractorData
-{
-    public string name;
-    public string mobile_number;
-    public string email;
-    public string company_name;
-    public string head_office_location;
-    public string project_name;
-    public string project_location;
-    public string account_type;
-    public string signature;
-    public string application_type;
-    public string sales_comment;
-}
+//[System.Serializable]
+//public class ContractorData
+//{
+//    public string name;
+//    public string mobile_number;
+//    public string email;
+//    public string company_name;
+//    public string head_office_location;
+//    public string project_name;
+//    public string project_location;
+//    public string account_type;
+//    public string signature;
+//    public string application_type;
+//    public string sales_comment;
+//}
 
-[System.Serializable]
-public class ApiContractorData
-{
-    public string name;
-    public string mobile_number;
-    public string email;
-    public string company_name;
-    public string head_office_location;
-    public string project_name;
-    public string project_location;
-    public string account_type;
-    public string signature;
-    public string app_type;
-    public string sales_comment;
-}
+//[System.Serializable]
+//public class ApiContractorData
+//{
+//    public string name;
+//    public string mobile_number;
+//    public string email;
+//    public string company_name;
+//    public string head_office_location;
+//    public string project_name;
+//    public string project_location;
+//    public string account_type;
+//    public string signature;
+//    public string app_type;
+//    public string sales_comment;
+//}
 
 public class ApiHandler : MonoBehaviour
 {
@@ -145,7 +145,7 @@ public class ApiHandler : MonoBehaviour
     private void SetupCsvPath()
     {
         // Use dataPath for file location
-        csvFilePath = Application.dataPath + "/" + csvFileName;
+        csvFilePath = Application.persistentDataPath + "/" + csvFileName;
         Debug.Log($"[ApiHandler] CSV file path: {csvFilePath}");
     }
 
@@ -1308,18 +1308,18 @@ public class ApiHandler : MonoBehaviour
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(csvFilePath);
             string extension = Path.GetExtension(csvFilePath);
 
-            // Find the next available number
-            int counter = 1;
-            string newFileName;
-            string newFilePath;
+            // Generate timestamp-based filename
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            string newFileName = $"{renamedFilePrefix}{timestamp}{extension}";
+            string newFilePath = Path.Combine(directory, newFileName);
 
-            do
+            // If file exists with same timestamp (unlikely but possible), add milliseconds
+            if (File.Exists(newFilePath))
             {
-                newFileName = $"{renamedFilePrefix}{counter}{extension}";
+                timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff");
+                newFileName = $"{renamedFilePrefix}{timestamp}{extension}";
                 newFilePath = Path.Combine(directory, newFileName);
-                counter++;
             }
-            while (File.Exists(newFilePath));
 
             // Rename the file
             File.Move(csvFilePath, newFilePath);
@@ -1359,21 +1359,9 @@ public class ApiHandler : MonoBehaviour
         if (string.IsNullOrEmpty(csvFilePath))
             return "";
 
-        string directory = Path.GetDirectoryName(csvFilePath);
         string extension = Path.GetExtension(csvFilePath);
-
-        // Find the next available number
-        int counter = 1;
-        string newFileName;
-        string newFilePath;
-
-        do
-        {
-            newFileName = $"{renamedFilePrefix}{counter}{extension}";
-            newFilePath = Path.Combine(directory, newFileName);
-            counter++;
-        }
-        while (File.Exists(newFilePath));
+        string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+        string newFileName = $"{renamedFilePrefix}{timestamp}{extension}";
 
         return newFileName;
     }
@@ -1699,5 +1687,150 @@ public class ApiHandler : MonoBehaviour
     {
         Debug.Log("[ApiHandler] Manual button state update triggered");
         UpdateButtonStates();
+    }
+
+    /// <summary>
+    /// Closes all connections, stops all processes, and returns to idle state.
+    /// This method should be called when exiting the application or resetting the sync state.
+    /// </summary>
+    public void CloseConnection()
+    {
+        if (enableDebugLogging)
+            Debug.Log("[ApiHandler] CloseConnection called - stopping all processes and returning to idle state");
+
+        try
+        {
+            // Stop any ongoing sync process
+            if (isSyncing)
+            {
+                if (enableDebugLogging)
+                    Debug.Log("[ApiHandler] Stopping ongoing sync process");
+                
+                isSyncing = false;
+                StopProgressAnimation();
+            }
+
+            // Stop all running coroutines related to sync operations
+            StopAllCoroutines();
+            
+            if (enableDebugLogging)
+                Debug.Log("[ApiHandler] All coroutines stopped");
+
+            // Reset sync state variables
+            lastSyncSuccess = false;
+            lastApiMessage = "";
+            pendingSyncCount = 0;
+
+            // Clear CSV data to prevent accidental operations
+            csvData = new ContractorData[0];
+
+            // Reset UI elements to idle state
+            UpdateStatusDisplay(messageIdle);
+            UpdateButtonStates();
+
+            // Reset progress animation
+            if (syncProgressImage != null)
+            {
+                syncProgressImage.fillAmount = 0f;
+                syncProgressImage.gameObject.SetActive(false);
+            }
+
+            // Clear any progress animation coroutine reference
+            progressAnimationCoroutine = null;
+
+            if (enableDebugLogging)
+            {
+                Debug.Log("[ApiHandler] CloseConnection completed successfully:");
+                Debug.Log("[ApiHandler]   - Sync process stopped");
+                Debug.Log("[ApiHandler]   - All coroutines stopped");
+                Debug.Log("[ApiHandler]   - State variables reset");
+                Debug.Log("[ApiHandler]   - UI returned to idle state");
+                Debug.Log("[ApiHandler]   - CSV data cleared");
+            }
+
+            // Trigger success message briefly
+            UpdateStatusDisplay("Connection closed - Ready to restart");
+            
+            // After a brief delay, return to normal idle message
+            StartCoroutine(ReturnToIdleAfterDelay(2f));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[ApiHandler] Error during CloseConnection: {ex.Message}");
+            Debug.LogError($"[ApiHandler] Stack trace: {ex.StackTrace}");
+            
+            // Force reset to idle state even if there was an error
+            isSyncing = false;
+            UpdateStatusDisplay(messageIdle);
+            UpdateButtonStates();
+            
+            // Trigger error event if available
+            OnError?.Invoke($"Error during connection close: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Helper coroutine to return to idle message after a delay
+    /// </summary>
+    private IEnumerator ReturnToIdleAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        UpdateStatusDisplay(messageIdle);
+        
+        if (enableDebugLogging)
+            Debug.Log("[ApiHandler] Returned to idle message after close connection");
+    }
+
+    /// <summary>
+    /// Alternative method name for closing connection - same functionality as CloseConnection
+    /// </summary>
+    public void ExitMethod()
+    {
+        CloseConnection();
+    }
+
+    /// <summary>
+    /// Emergency stop method - immediately halts all operations without cleanup delays
+    /// Use this for critical shutdown scenarios
+    /// </summary>
+    public void EmergencyStop()
+    {
+        if (enableDebugLogging)
+            Debug.Log("[ApiHandler] Emergency stop called - immediate halt of all operations");
+
+        try
+        {
+            // Immediately stop all coroutines
+            StopAllCoroutines();
+            
+            // Force reset all state variables
+            isSyncing = false;
+            lastSyncSuccess = false;
+            lastApiMessage = "Emergency stop activated";
+            pendingSyncCount = 0;
+            progressAnimationCoroutine = null;
+            
+            // Clear data
+            csvData = new ContractorData[0];
+            
+            // Reset UI immediately
+            if (syncProgressImage != null)
+            {
+                syncProgressImage.fillAmount = 0f;
+                syncProgressImage.gameObject.SetActive(false);
+            }
+            
+            UpdateStatusDisplay("Emergency stop - System halted");
+            UpdateButtonStates();
+            
+            Debug.Log("[ApiHandler] Emergency stop completed - all operations halted");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[ApiHandler] Error during emergency stop: {ex.Message}");
+            // Force basic reset even if error occurs
+            isSyncing = false;
+            UpdateStatusDisplay("System error - Please restart");
+        }
     }
 }

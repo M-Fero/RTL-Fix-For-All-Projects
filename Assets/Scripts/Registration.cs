@@ -94,6 +94,8 @@ public class Registration : MonoBehaviour
     [Tooltip("Button to save registration data. Will be automatically connected to SaveButton method.")]
     [SerializeField] private Button saveButton;
 
+    [Header("Debug Info")]
+    [SerializeField] private TextMeshProUGUI pathlocation;
     private string filePath;
     private const string CSV_HEADER = "Name,Mobile_Number,Email,Company_Name,Head_Office_Location,Project_Name,Project_Location,Account_Type,Signature,Application_Type,Sales_Comment";
 
@@ -117,8 +119,8 @@ public class Registration : MonoBehaviour
 
     private void Start()
     {
-        // Use dataPath for file location
-        filePath = Application.dataPath + "/" + fileName;
+        // Use persistentDataPath for cross-platform compatibility (especially Android)
+        filePath = Application.persistentDataPath + "/" + fileName;
         InitializeFile();
 
         // Validate RTL setup
@@ -134,11 +136,18 @@ public class Registration : MonoBehaviour
         {
             Debug.LogWarning("Save button is not assigned in the inspector.");
         }
+
+        // Update debug display
+        if (pathlocation != null)
+        {
+            pathlocation.text = filePath;
+        }
     }
     public void ReSetupTheFile()
     {
         // Use dataPath for file location
-        filePath = Application.dataPath + "/" + fileName;
+        filePath = Application.persistentDataPath + "/" + fileName;
+        
         InitializeFile();
 
         // Validate RTL setup
@@ -154,6 +163,10 @@ public class Registration : MonoBehaviour
         else
         {
             Debug.LogWarning("Save button is not assigned in the inspector.");
+        }
+        if (filePath != null) 
+        {
+            pathlocation.text = filePath;
         }
     }
 

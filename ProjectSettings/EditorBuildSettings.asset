@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/BigFive.unity
-    guid: 61ad1cdbc8c03dd4284ccfd92dfaccf0
+    path: Assets/Scenes/KNAUF.unity
+    guid: 6bcc87b2d55942446975f99ae2c4da10
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

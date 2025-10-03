@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
 [System.Serializable]
 public class ContractorData
@@ -47,6 +48,7 @@ public class ApiHandlers : MonoBehaviour
     public TMP_Text statusText;
     public Button syncButton;
     public Button closeButton;
+    public Button newDayButton;
     public Image syncProgressImage;
 
     [Header("API Settings")]
@@ -72,6 +74,8 @@ public class ApiHandlers : MonoBehaviour
     private string csvFilePath;
     private ContractorData[] csvData;
 
+    [Header("Events")]
+    public UnityEvent SuccessEvent;
     public static ApiHandlers Instance { get; private set; }
 
     private void Awake()
@@ -103,6 +107,7 @@ public class ApiHandlers : MonoBehaviour
     {
         if (syncButton != null) syncButton.interactable = !isSyncing;
         if (closeButton != null) closeButton.interactable = !isSyncing;
+        if (newDayButton!= null) newDayButton.interactable = !isSyncing;
     }
 
     private void LoadCsvData()
@@ -143,10 +148,20 @@ public class ApiHandlers : MonoBehaviour
     public void ManualSyncAllData()
     {
         if (isSyncing) { UpdateStatusDisplay("Sync already running..."); return; }
+        
+        // Reload CSV data before syncing
+        ReloadCsvData();
+        
         if (csvData == null || csvData.Length == 0) { UpdateStatusDisplay(messageNoData); return; }
         StartCoroutine(SyncAllCsvData());
     }
-
+    public void ReloadCsvData()
+    {
+        Debug.Log("[ApiHandlers] Reloading CSV data...");
+        LoadCsvData();
+        UpdateStatusDisplay($"CSV reloaded - {csvData?.Length ?? 0} records found");
+        Debug.Log($"[ApiHandlers] CSV data reloaded. Found {csvData?.Length ?? 0} records");
+    }
     public IEnumerator SyncAllCsvData()
     {
         isSyncing = true;
@@ -201,7 +216,11 @@ public class ApiHandlers : MonoBehaviour
         }
 
         if (failCount == 0)
+        { 
             UpdateStatusDisplay($"{messageSuccess} ({successCount} records)");
+            SuccessEvent?.Invoke();
+        }
+
         else
             UpdateStatusDisplay($"Partial: {successCount} success, {failCount} failed");
 

@@ -8,6 +8,69 @@ using System.Collections.Generic;
 using UPersian.Components;
 using System.Linq;
 
+// Enum for UI control types
+[System.Serializable]
+public enum UIControlType
+{
+    InputField,
+    Dropdown,
+    Toggle,
+    Slider
+}
+
+// Serializable class to define field mappings
+[System.Serializable]
+public class FieldMapping
+{
+    [Tooltip("The key name for this field (e.g., 'name', 'email', etc.)")]
+    public string fieldKey;
+    
+    [Tooltip("Display name for this field (used in validation messages)")]
+    public string displayName;
+    
+    [Tooltip("Type of UI control for this field")]
+    public UIControlType controlType;
+    
+    [Tooltip("Is this field required for validation?")]
+    public bool isRequired = true;
+    
+    [Tooltip("TMP InputField component (use when controlType is InputField)")]
+    public TMP_InputField inputField;
+    
+    [Tooltip("TMP Dropdown component (use when controlType is Dropdown)")]
+    public TMP_Dropdown dropdown;
+    
+    [Tooltip("Toggle component (use when controlType is Toggle)")]
+    public Toggle toggle;
+    
+    [Tooltip("Slider component (use when controlType is Slider)")]
+    public Slider slider;
+    
+    [Tooltip("Required field warning label for this field")]
+    public TextMeshProUGUI requiredLabel;
+    
+    [Tooltip("Default value for this field if empty")]
+    public string defaultValue = "";
+    
+    public FieldMapping()
+    {
+        fieldKey = "";
+        displayName = "";
+        controlType = UIControlType.InputField;
+        isRequired = true;
+        defaultValue = "";
+    }
+    
+    public FieldMapping(string key, string display, UIControlType type, bool required = true)
+    {
+        fieldKey = key;
+        displayName = display;
+        controlType = type;
+        isRequired = required;
+        defaultValue = "";
+    }
+}
+
 public class Registration : MonoBehaviour
 {
     public static Registration Instance { get; private set; }
@@ -22,59 +85,13 @@ public class Registration : MonoBehaviour
     // Public property to access full file path
     public string FilePath => filePath;
 
-    // Define the standard field keys used in registration
-    private static readonly List<string> STANDARD_FIELD_KEYS = new List<string>
-    {
-        "name", "mobile_number", "email", "company_name", "head_office_location",
-        "project_name", "project_location", "account_type", "signature",
-        "application_type", "sales_comment"
-    };
-
-    [Header("UPersian RTL Input Fields")]
-    [Tooltip("UPersian RTL TMP InputField for Name (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField nameUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Mobile Number.")]
-    [SerializeField] private TMP_InputField mobileNumberUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Email.")]
-    [SerializeField] private TMP_InputField emailUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Company Name (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField companyNameUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Head Office Location (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField headOfficeLocationUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Project Name (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField projectNameUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Project Location (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField projectLocationUPersianRTL;
-    [Tooltip("UPersian RTL TMP Dropdown for Account Type (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_Dropdown accountTypeDropdownUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Signature (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField signatureUPersianRTL;
-    [Tooltip("UPersian RTL TMP Dropdown for Application Type (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_Dropdown applicationTypeDropdownUPersianRTL;
-    [Tooltip("UPersian RTL TMP InputField for Sales Comment (Auto RTL/LTR detection).")]
-    [SerializeField] private TMP_InputField salesCommentUPersianRTL;
-
-    [Header("Required Field Warning Labels")]
-    [Tooltip("TextMeshPro component to show 'This field is required' for Name field.")]
-    [SerializeField] private TextMeshProUGUI nameRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Mobile Number field.")]
-    [SerializeField] private TextMeshProUGUI mobileNumberRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Email field.")]
-    [SerializeField] private TextMeshProUGUI emailRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Company Name field.")]
-    [SerializeField] private TextMeshProUGUI companyNameRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Head Office Location field.")]
-    [SerializeField] private TextMeshProUGUI headOfficeLocationRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Project Name field.")]
-    [SerializeField] private TextMeshProUGUI projectNameRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Project Location field.")]
-    [SerializeField] private TextMeshProUGUI projectLocationRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Account Type field.")]
-    [SerializeField] private TextMeshProUGUI accountTypeRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Signature field.")]
-    [SerializeField] private TextMeshProUGUI signatureRequiredLabel;
-    [Tooltip("TextMeshPro component to show 'This field is required' for Application Type field.")]
-    [SerializeField] private TextMeshProUGUI applicationTypeRequiredLabel;
+    [Header("Dynamic Field Configuration")]
+    [Tooltip("Configure the dynamic fields and their UI mappings")]
+    [SerializeField] public List<FieldMapping> fieldMappings = new List<FieldMapping>();
+    
+    [Header("CSV Export Settings")]
+    [Tooltip("Custom order for CSV export (leave empty to use field mapping order)")]
+    [SerializeField] public List<string> csvFieldOrder = new List<string>();
 
     [Header("Save Events")]
     [Tooltip("Event triggered when registration is saved successfully.")]
@@ -87,8 +104,9 @@ public class Registration : MonoBehaviour
 
     [Header("Debug Info")]
     [SerializeField] private TextMeshProUGUI pathlocation;
+    
     private string filePath;
-    private const string CSV_HEADER = "Name,Mobile_Number,Email,Company_Name,Head_Office_Location,Project_Name,Project_Location,Account_Type,Signature,Application_Type,Sales_Comment";
+    private List<string> csvHeader;
 
     // Helper method to get current timestamp in consistent format
     private string GetTimestamp()
@@ -112,10 +130,14 @@ public class Registration : MonoBehaviour
     {
         // Use persistentDataPath for cross-platform compatibility (especially Android)
         filePath = Application.persistentDataPath + "/" + fileName;
+        
+        // Initialize the CSV header based on field mappings
+        InitializeCsvHeader();
+        
         InitializeFile();
 
-        // Validate RTL setup
-        ValidateRTLSetup();
+        // Validate dynamic field setup
+        ValidateFieldMappings();
 
         // Connect the save button to the SaveButton method
         if (saveButton != null)
@@ -135,15 +157,36 @@ public class Registration : MonoBehaviour
         }
     }
     
+    private void InitializeCsvHeader()
+    {
+        if (csvFieldOrder.Count > 0)
+        {
+            csvHeader = new List<string>(csvFieldOrder);
+        }
+        else
+        {
+            csvHeader = fieldMappings.Select(fm => fm.fieldKey).ToList();
+        }
+        
+        // Always add timestamp if not present
+        if (!csvHeader.Contains("timestamp"))
+        {
+            csvHeader.Add("timestamp");
+        }
+        
+        Debug.Log($"CSV Header initialized: {string.Join(", ", csvHeader)}");
+    }
+    
     public void ReSetupTheFile()
     {
         // Use dataPath for file location
         filePath = Application.persistentDataPath + "/" + fileName;
         
+        InitializeCsvHeader();
         InitializeFile();
 
-        // Validate RTL setup
-        ValidateRTLSetup();
+        // Validate field mappings
+        ValidateFieldMappings();
 
         // Connect the save button to the SaveButton method
         if (saveButton != null)
@@ -156,36 +199,65 @@ public class Registration : MonoBehaviour
         {
             Debug.LogWarning("Save button is not assigned in the inspector.");
         }
+        
         if (filePath != null) 
         {
             pathlocation.text = filePath;
         }
     }
 
-    // Validate that RTL components are properly set up
-    private void ValidateRTLSetup()
+    // Validate that field mappings are properly set up
+    private void ValidateFieldMappings()
     {
-        var missingFields = new List<string>();
+        var issues = new List<string>();
         
-        if (nameUPersianRTL == null) missingFields.Add("Name");
-        if (mobileNumberUPersianRTL == null) missingFields.Add("Mobile Number");
-        if (emailUPersianRTL == null) missingFields.Add("Email");
-        if (companyNameUPersianRTL == null) missingFields.Add("Company Name");
-        if (headOfficeLocationUPersianRTL == null) missingFields.Add("Head Office Location");
-        if (projectNameUPersianRTL == null) missingFields.Add("Project Name");
-        if (projectLocationUPersianRTL == null) missingFields.Add("Project Location");
-        if (accountTypeDropdownUPersianRTL == null) missingFields.Add("Account Type Dropdown");
-        if (signatureUPersianRTL == null) missingFields.Add("Signature");
-        if (applicationTypeDropdownUPersianRTL == null) missingFields.Add("Application Type Dropdown");
-        if (salesCommentUPersianRTL == null) missingFields.Add("Sales Comment");
-        
-        if (missingFields.Count > 0)
+        for (int i = 0; i < fieldMappings.Count; i++)
         {
-            Debug.LogWarning($"Missing RTL field assignments: {string.Join(", ", missingFields)}");
+            var mapping = fieldMappings[i];
+            
+            // Check for empty field key
+            if (string.IsNullOrEmpty(mapping.fieldKey))
+            {
+                issues.Add($"Field mapping {i}: Field key is empty");
+                continue;
+            }
+            
+            // Check for duplicate field keys
+            var duplicates = fieldMappings.Count(fm => fm.fieldKey == mapping.fieldKey);
+            if (duplicates > 1)
+            {
+                issues.Add($"Field mapping {i}: Duplicate field key '{mapping.fieldKey}'");
+            }
+            
+            // Check if UI control is assigned based on control type
+            switch (mapping.controlType)
+            {
+                case UIControlType.InputField:
+                    if (mapping.inputField == null)
+                        issues.Add($"Field '{mapping.fieldKey}': InputField is not assigned");
+                    break;
+                case UIControlType.Dropdown:
+                    if (mapping.dropdown == null)
+                        issues.Add($"Field '{mapping.fieldKey}': Dropdown is not assigned");
+                    break;
+                case UIControlType.Toggle:
+                    if (mapping.toggle == null)
+                        issues.Add($"Field '{mapping.fieldKey}': Toggle is not assigned");
+                    break;
+                case UIControlType.Slider:
+                    if (mapping.slider == null)
+                        issues.Add($"Field '{mapping.fieldKey}': Slider is not assigned");
+                    break;
+            }
+        }
+        
+        if (issues.Count > 0)
+        {
+            Debug.LogWarning($"Field mapping validation issues:\n{string.Join("\n", issues)}");
         }
         else
         {
-            Debug.Log("All RTL input fields are properly assigned.");
+            Debug.Log("All field mappings are properly configured.");
         }
 
         // Initialize required field labels
@@ -198,75 +270,14 @@ public class Registration : MonoBehaviour
         const string requiredText = "This field is required";
         Color warningColor = Color.red;
 
-        // Initialize each label if it exists
-        if (nameRequiredLabel != null)
+        foreach (var mapping in fieldMappings)
         {
-            nameRequiredLabel.text = requiredText;
-            nameRequiredLabel.color = warningColor;
-            nameRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (mobileNumberRequiredLabel != null)
-        {
-            mobileNumberRequiredLabel.text = requiredText;
-            mobileNumberRequiredLabel.color = warningColor;
-            mobileNumberRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (emailRequiredLabel != null)
-        {
-            emailRequiredLabel.text = requiredText;
-            emailRequiredLabel.color = warningColor;
-            emailRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (companyNameRequiredLabel != null)
-        {
-            companyNameRequiredLabel.text = requiredText;
-            companyNameRequiredLabel.color = warningColor;
-            companyNameRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (headOfficeLocationRequiredLabel != null)
-        {
-            headOfficeLocationRequiredLabel.text = requiredText;
-            headOfficeLocationRequiredLabel.color = warningColor;
-            headOfficeLocationRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (projectNameRequiredLabel != null)
-        {
-            projectNameRequiredLabel.text = requiredText;
-            projectNameRequiredLabel.color = warningColor;
-            projectNameRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (projectLocationRequiredLabel != null)
-        {
-            projectLocationRequiredLabel.text = requiredText;
-            projectLocationRequiredLabel.color = warningColor;
-            projectLocationRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (accountTypeRequiredLabel != null)
-        {
-            accountTypeRequiredLabel.text = requiredText;
-            accountTypeRequiredLabel.color = warningColor;
-            accountTypeRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (signatureRequiredLabel != null)
-        {
-            signatureRequiredLabel.text = requiredText;
-            signatureRequiredLabel.color = warningColor;
-            signatureRequiredLabel.gameObject.SetActive(false);
-        }
-
-        if (applicationTypeRequiredLabel != null)
-        {
-            applicationTypeRequiredLabel.text = requiredText;
-            applicationTypeRequiredLabel.color = warningColor;
-            applicationTypeRequiredLabel.gameObject.SetActive(false);
+            if (mapping.requiredLabel != null)
+            {
+                mapping.requiredLabel.text = requiredText;
+                mapping.requiredLabel.color = warningColor;
+                mapping.requiredLabel.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -286,7 +297,8 @@ public class Registration : MonoBehaviour
             {
                 using (StreamWriter writer = File.CreateText(filePath))
                 {
-                    writer.WriteLine(CSV_HEADER);
+                    string headerLine = string.Join(",", csvHeader.Select(h => h.Replace("_", " ").ToUpper()));
+                    writer.WriteLine(headerLine);
                 }
                 Debug.Log($"Created new CSV file: {filePath}");
             }
@@ -305,28 +317,16 @@ public class Registration : MonoBehaviour
     {
         try
         {
-            if (nameUPersianRTL == null || mobileNumberUPersianRTL == null || emailUPersianRTL == null || 
-                companyNameUPersianRTL == null || headOfficeLocationUPersianRTL == null || 
-                projectNameUPersianRTL == null || projectLocationUPersianRTL == null || accountTypeDropdownUPersianRTL == null ||
-                signatureUPersianRTL == null || applicationTypeDropdownUPersianRTL == null || salesCommentUPersianRTL == null)
-            {
-                throw new InvalidOperationException("One or more UPersian RTL Input fields are not assigned.");
-            }
-
             var data = new RegistrationData();
             
-            // Add all the standard fields using the dynamic field system
-            data.AddField("name", GetRtlSafeText(nameUPersianRTL));
-            data.AddField("mobile_number", GetRtlSafeText(mobileNumberUPersianRTL));
-            data.AddField("email", GetRtlSafeText(emailUPersianRTL));
-            data.AddField("company_name", GetRtlSafeText(companyNameUPersianRTL));
-            data.AddField("head_office_location", GetRtlSafeText(headOfficeLocationUPersianRTL));
-            data.AddField("project_name", GetRtlSafeText(projectNameUPersianRTL));
-            data.AddField("project_location", GetRtlSafeText(projectLocationUPersianRTL));
-            data.AddField("account_type", GetSelectedAccountType(accountTypeDropdownUPersianRTL));
-            data.AddField("signature", GetRtlSafeText(signatureUPersianRTL));
-            data.AddField("application_type", GetSelectedApplicationType(applicationTypeDropdownUPersianRTL));
-            data.AddField("sales_comment", GetRtlSafeText(salesCommentUPersianRTL));
+            // Process each field mapping
+            foreach (var mapping in fieldMappings)
+            {
+                string value = GetFieldValueFromUI(mapping);
+                data.AddField(mapping.fieldKey, value);
+            }
+            
+            // Always add timestamp
             data.AddField("timestamp", GetTimestamp());
 
             return data;
@@ -335,6 +335,76 @@ public class Registration : MonoBehaviour
         {
             Debug.LogError($"Error getting current inputs: {ex.Message}");
             throw;
+        }
+    }
+
+    // Get field value from UI based on control type
+    private string GetFieldValueFromUI(FieldMapping mapping)
+    {
+        try
+        {
+            switch (mapping.controlType)
+            {
+                case UIControlType.InputField:
+                    if (mapping.inputField != null)
+                        return GetRtlSafeText(mapping.inputField);
+                    break;
+                    
+                case UIControlType.Dropdown:
+                    if (mapping.dropdown != null)
+                        return GetSelectedDropdownValue(mapping.dropdown);
+                    break;
+                    
+                case UIControlType.Toggle:
+                    if (mapping.toggle != null)
+                        return mapping.toggle.isOn.ToString();
+                    break;
+                    
+                case UIControlType.Slider:
+                    if (mapping.slider != null)
+                        return mapping.slider.value.ToString();
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"Failed to get value for field '{mapping.fieldKey}': {ex.Message}");
+        }
+        
+        return mapping.defaultValue;
+    }
+
+    // Set field value to UI based on control type
+    private void SetFieldValueToUI(FieldMapping mapping, string value)
+    {
+        try
+        {
+            switch (mapping.controlType)
+            {
+                case UIControlType.InputField:
+                    if (mapping.inputField != null)
+                        mapping.inputField.text = value;
+                    break;
+                    
+                case UIControlType.Dropdown:
+                    if (mapping.dropdown != null)
+                        SetDropdownValue(mapping.dropdown, value);
+                    break;
+                    
+                case UIControlType.Toggle:
+                    if (mapping.toggle != null && bool.TryParse(value, out bool toggleValue))
+                        mapping.toggle.isOn = toggleValue;
+                    break;
+                    
+                case UIControlType.Slider:
+                    if (mapping.slider != null && float.TryParse(value, out float sliderValue))
+                        mapping.slider.value = sliderValue;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"Failed to set value for field '{mapping.fieldKey}': {ex.Message}");
         }
     }
 
@@ -369,18 +439,25 @@ public class Registration : MonoBehaviour
         }
     }
 
-    private string GetSelectedAccountType(TMP_Dropdown dropdown)
+    private string GetSelectedDropdownValue(TMP_Dropdown dropdown)
     {
         if (dropdown == null || dropdown.options == null || dropdown.value < 0 || dropdown.value >= dropdown.options.Count)
             return "";
         return dropdown.options[dropdown.value].text;
     }
-
-    private string GetSelectedApplicationType(TMP_Dropdown dropdown)
+    
+    private void SetDropdownValue(TMP_Dropdown dropdown, string value)
     {
-        if (dropdown == null || dropdown.options == null || dropdown.value < 0 || dropdown.value >= dropdown.options.Count)
-            return "";
-        return dropdown.options[dropdown.value].text;
+        if (dropdown == null || dropdown.options == null) return;
+        
+        for (int i = 0; i < dropdown.options.Count; i++)
+        {
+            if (dropdown.options[i].text == value)
+            {
+                dropdown.value = i;
+                return;
+            }
+        }
     }
 
     // Comprehensive save button method that handles the complete save workflow
@@ -398,32 +475,21 @@ public class Registration : MonoBehaviour
             // Step 2: Get and validate registration data
             RegistrationData data = GetCurrentInputs();
 
-            // Additional validation for required fields
-            if (string.IsNullOrEmpty(data.GetFieldValue("name")) || string.IsNullOrEmpty(data.GetFieldValue("mobile_number")) ||
-                string.IsNullOrEmpty(data.GetFieldValue("email")) || string.IsNullOrEmpty(data.GetFieldValue("company_name")) ||
-                string.IsNullOrEmpty(data.GetFieldValue("head_office_location")) || string.IsNullOrEmpty(data.GetFieldValue("project_name")) ||
-                string.IsNullOrEmpty(data.GetFieldValue("project_location")) || string.IsNullOrEmpty(data.GetFieldValue("account_type")) ||
-                string.IsNullOrEmpty(data.GetFieldValue("signature")) || string.IsNullOrEmpty(data.GetFieldValue("application_type")))
-            {
-                Debug.LogWarning("All required fields must be filled. Sales comment is optional.");
-                return;
-            }
-
-            // Step 5: Save the registration data
-            string csvLine = data.ToCsvLine(STANDARD_FIELD_KEYS);
+            // Step 3: Save the registration data
+            string csvLine = data.ToCsvLine(csvHeader);
             
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
                 writer.WriteLine(csvLine);
             }
 
-            Debug.Log($"Registration saved successfully for {data.GetFieldValue("name")} ({data.GetFieldValue("mobile_number")})");
+            Debug.Log($"Registration saved successfully");
 
-            // Step 6: Clear all input fields after successful save
+            // Step 4: Clear all input fields after successful save
             ClearAllInputs();
             Debug.Log("Input fields cleared for new registration.");
 
-            // Step 7: Trigger the save success event
+            // Step 5: Trigger the save success event
             SaveSuccessfullEvent?.Invoke();
             Debug.Log("Save success event triggered.");
         }
@@ -439,13 +505,19 @@ public class Registration : MonoBehaviour
         {
             RegistrationData data = GetCurrentInputs();
             
-            if (string.IsNullOrEmpty(data.GetFieldValue("name")) || string.IsNullOrEmpty(data.GetFieldValue("mobile_number")))
+            // Basic validation for at least one required field
+            var requiredFields = fieldMappings.Where(fm => fm.isRequired).ToList();
+            if (requiredFields.Count > 0)
             {
-                Debug.LogWarning("Name and mobile number are required fields and cannot be empty.");
-                return;
+                bool hasRequiredData = requiredFields.Any(rf => !string.IsNullOrEmpty(data.GetFieldValue(rf.fieldKey)));
+                if (!hasRequiredData)
+                {
+                    Debug.LogWarning("At least one required field must be filled.");
+                    return;
+                }
             }
 
-            string csvLine = data.ToCsvLine(STANDARD_FIELD_KEYS);
+            string csvLine = data.ToCsvLine(csvHeader);
             
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
@@ -470,7 +542,7 @@ public class Registration : MonoBehaviour
 
         try
         {
-            string csvLine = data.ToCsvLine(STANDARD_FIELD_KEYS);
+            string csvLine = data.ToCsvLine(csvHeader);
             
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
@@ -483,24 +555,16 @@ public class Registration : MonoBehaviour
         }
     }
 
-    // Legacy method for backward compatibility
-    public void SaveNameAndPhone(string name, string phone)
+    // Load registration data into UI
+    public void LoadRegistrationToUI(RegistrationData data)
     {
-        var data = new RegistrationData();
-        data.AddField("name", name?.Trim() ?? "");
-        data.AddField("mobile_number", phone?.Trim() ?? "");
-        data.AddField("email", "");
-        data.AddField("company_name", "");
-        data.AddField("head_office_location", "");
-        data.AddField("project_name", "");
-        data.AddField("project_location", "");
-        data.AddField("account_type", "");
-        data.AddField("signature", "");
-        data.AddField("application_type", "");
-        data.AddField("sales_comment", "");
-        data.AddField("timestamp", GetTimestamp());
+        if (data == null) return;
         
-        SaveRegistrationData(data);
+        foreach (var mapping in fieldMappings)
+        {
+            string value = data.GetFieldValue(mapping.fieldKey);
+            SetFieldValueToUI(mapping, value);
+        }
     }
 
     public string ReadAllData()
@@ -510,7 +574,7 @@ public class Registration : MonoBehaviour
             if (!File.Exists(filePath))
             {
                 InitializeFile();
-                return CSV_HEADER;
+                return string.Join(",", csvHeader);
             }
 
             return File.ReadAllText(filePath);
@@ -522,15 +586,19 @@ public class Registration : MonoBehaviour
         }
     }
 
-    public bool IsMobileExists(string mobileToCheck)
+    // Dynamic field existence check
+    public bool IsFieldValueExists(string fieldKey, string valueToCheck)
     {
-        if (string.IsNullOrEmpty(mobileToCheck))
+        if (string.IsNullOrEmpty(valueToCheck) || string.IsNullOrEmpty(fieldKey))
             return false;
 
         try
         {
             if (!File.Exists(filePath))
                 return false;
+
+            int fieldIndex = csvHeader.IndexOf(fieldKey);
+            if (fieldIndex == -1) return false;
 
             using (var reader = new StreamReader(filePath))
             {
@@ -541,7 +609,7 @@ public class Registration : MonoBehaviour
                     if (isFirstLine) { isFirstLine = false; continue; }
                     
                     var parts = ParseCsvLine(line);
-                    if (parts.Count > 1 && parts[1].Trim() == mobileToCheck.Trim())
+                    if (parts.Count > fieldIndex && parts[fieldIndex].Trim().Equals(valueToCheck.Trim(), StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
             }
@@ -549,60 +617,20 @@ public class Registration : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Failed to check mobile number: {ex.Message}");
+            Debug.LogError($"Failed to check field value: {ex.Message}");
             return false;
         }
+    }
+
+    // Legacy method for backward compatibility
+    public bool IsMobileExists(string mobileToCheck)
+    {
+        return IsFieldValueExists("mobile_number", mobileToCheck);
     }
 
     public bool IsEmailExists(string emailToCheck)
     {
-        if (string.IsNullOrEmpty(emailToCheck))
-            return false;
-
-        try
-        {
-            if (!File.Exists(filePath))
-                return false;
-
-            using (var reader = new StreamReader(filePath))
-            {
-                string line;
-                bool isFirstLine = true;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (isFirstLine) { isFirstLine = false; continue; }
-                    
-                    var parts = ParseCsvLine(line);
-                    if (parts.Count > 2 && parts[2].Trim().Equals(emailToCheck.Trim(), StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-            }
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to check email: {ex.Message}");
-            return false;
-        }
-    }
-
-    // Helper method to escape CSV fields containing commas, quotes, or newlines
-    private string EscapeCsvField(string field)
-    {
-        if (string.IsNullOrEmpty(field))
-            return "";
-
-        if (field.Contains(",") || field.Contains("\"") || field.Contains("\n") || field.Contains("\r"))
-        {
-            return "\"" + field.Replace("\"", "\"\"") + "\"";
-        }
-        return field;
-    }
-
-    // Helper method to handle sales comment field - returns "Null" if empty
-    private string ProcessSalesComment(string salesComment)
-    {
-        return string.IsNullOrEmpty(salesComment?.Trim()) ? "Null" : salesComment.Trim();
+        return IsFieldValueExists("email", emailToCheck);
     }
 
     // Helper method to parse CSV lines properly handling escaped fields
@@ -663,10 +691,13 @@ public class Registration : MonoBehaviour
                     if (isFirstLine) { isFirstLine = false; continue; }
                     
                     var data = new RegistrationData();
-                    data.FromCsvLine(line, STANDARD_FIELD_KEYS);
+                    data.FromCsvLine(line, csvHeader);
                     
-                    // Set timestamp for internal use
-                    data.SetFieldValue("timestamp", GetTimestamp());
+                    // Set timestamp for internal use if not present
+                    if (string.IsNullOrEmpty(data.GetFieldValue("timestamp")))
+                    {
+                        data.SetFieldValue("timestamp", GetTimestamp());
+                    }
                     
                     registrations.Add(data);
                 }
@@ -699,8 +730,8 @@ public class Registration : MonoBehaviour
     {
         if (data == null) return "";
         
-        // Convert to raw data format for API: all 11 fields separated by commas (no timestamp)
-        var fieldsWithoutTimestamp = STANDARD_FIELD_KEYS.Where(key => key != "timestamp").ToList();
+        // Convert to raw data format for API: exclude timestamp
+        var fieldsWithoutTimestamp = csvHeader.Where(key => key != "timestamp").ToList();
         return data.ToCsvLine(fieldsWithoutTimestamp);
     }
 
@@ -715,7 +746,7 @@ public class Registration : MonoBehaviour
         try
         {
             var registrations = GetAllRegistrationsAsObjects();
-            return $"Total registrations: {registrations.Count}\nFile path: {filePath}\nFile exists: {File.Exists(filePath)}";
+            return $"Total registrations: {registrations.Count}\nFile path: {filePath}\nFile exists: {File.Exists(filePath)}\nFields: {string.Join(", ", csvHeader)}";
         }
         catch (Exception ex)
         {
@@ -728,17 +759,10 @@ public class Registration : MonoBehaviour
     {
         try
         {
-            if (nameUPersianRTL != null) nameUPersianRTL.text = "";
-            if (mobileNumberUPersianRTL != null) mobileNumberUPersianRTL.text = "";
-            if (emailUPersianRTL != null) emailUPersianRTL.text = "";
-            if (companyNameUPersianRTL != null) companyNameUPersianRTL.text = "";
-            if (headOfficeLocationUPersianRTL != null) headOfficeLocationUPersianRTL.text = "";
-            if (projectNameUPersianRTL != null) projectNameUPersianRTL.text = "";
-            if (projectLocationUPersianRTL != null) projectLocationUPersianRTL.text = "";
-            if (accountTypeDropdownUPersianRTL != null) accountTypeDropdownUPersianRTL.value = 0;
-            if (signatureUPersianRTL != null) signatureUPersianRTL.text = "";
-            if (applicationTypeDropdownUPersianRTL != null) applicationTypeDropdownUPersianRTL.value = 0;
-            if (salesCommentUPersianRTL != null) salesCommentUPersianRTL.text = "";
+            foreach (var mapping in fieldMappings)
+            {
+                SetFieldValueToUI(mapping, mapping.defaultValue);
+            }
 
             // Hide all required field labels when clearing inputs
             HideAllRequiredLabels();
@@ -760,93 +784,36 @@ public class Registration : MonoBehaviour
             // Hide all warning labels first
             HideAllRequiredLabels();
             
-            // Check required fields (Sales Comment is optional)
-            if (string.IsNullOrEmpty(data.GetFieldValue("name")))
+            // Check required fields
+            foreach (var mapping in fieldMappings)
             {
-                Debug.LogWarning("Name is required.");
-                ShowRequiredLabel(nameRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("mobile_number")))
-            {
-                Debug.LogWarning("Mobile number is required.");
-                ShowRequiredLabel(mobileNumberRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("email")))
-            {
-                Debug.LogWarning("Email is required.");
-                ShowRequiredLabel(emailRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("company_name")))
-            {
-                Debug.LogWarning("Company name is required.");
-                ShowRequiredLabel(companyNameRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("head_office_location")))
-            {
-                Debug.LogWarning("Head office location is required.");
-                ShowRequiredLabel(headOfficeLocationRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("project_name")))
-            {
-                Debug.LogWarning("Project name is required.");
-                ShowRequiredLabel(projectNameRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("project_location")))
-            {
-                Debug.LogWarning("Project location is required.");
-                ShowRequiredLabel(projectLocationRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("account_type")))
-            {
-                Debug.LogWarning("Account type must be selected.");
-                ShowRequiredLabel(accountTypeRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("signature")))
-            {
-                Debug.LogWarning("Signature is required.");
-                ShowRequiredLabel(signatureRequiredLabel);
-                isValid = false;
-            }
-            
-            if (string.IsNullOrEmpty(data.GetFieldValue("application_type")))
-            {
-                Debug.LogWarning("Application type must be selected.");
-                ShowRequiredLabel(applicationTypeRequiredLabel);
-                isValid = false;
-            }
-            
-            // Email format validation
-            string email = data.GetFieldValue("email");
-            if (!string.IsNullOrEmpty(email) && !IsValidEmail(email))
-            {
-                Debug.LogWarning("Invalid email format.");
-                ShowRequiredLabel(emailRequiredLabel, "Invalid email format");
-                isValid = false;
-            }
-            
-            // Mobile number basic validation (should contain only digits and common characters)
-            string mobileNumber = data.GetFieldValue("mobile_number");
-            if (!string.IsNullOrEmpty(mobileNumber) && !IsValidMobileNumber(mobileNumber))
-            {
-                Debug.LogWarning("Invalid mobile number format.");
-                ShowRequiredLabel(mobileNumberRequiredLabel, "Invalid mobile number format");
-                isValid = false;
+                if (mapping.isRequired)
+                {
+                    string fieldValue = data.GetFieldValue(mapping.fieldKey);
+                    if (string.IsNullOrEmpty(fieldValue))
+                    {
+                        string displayName = string.IsNullOrEmpty(mapping.displayName) ? mapping.fieldKey : mapping.displayName;
+                        Debug.LogWarning($"{displayName} is required.");
+                        ShowRequiredLabel(mapping.requiredLabel, $"{displayName} is required");
+                        isValid = false;
+                    }
+                    else
+                    {
+                        // Additional validation based on field type
+                        if (mapping.fieldKey == "email" && !IsValidEmail(fieldValue))
+                        {
+                            Debug.LogWarning("Invalid email format.");
+                            ShowRequiredLabel(mapping.requiredLabel, "Invalid email format");
+                            isValid = false;
+                        }
+                        else if (mapping.fieldKey.Contains("mobile") && !IsValidMobileNumber(fieldValue))
+                        {
+                            Debug.LogWarning("Invalid mobile number format.");
+                            ShowRequiredLabel(mapping.requiredLabel, "Invalid mobile number format");
+                            isValid = false;
+                        }
+                    }
+                }
             }
             
             return isValid;
@@ -878,16 +845,11 @@ public class Registration : MonoBehaviour
     // Helper method to hide all required field labels
     private void HideAllRequiredLabels()
     {
-        if (nameRequiredLabel != null) nameRequiredLabel.gameObject.SetActive(false);
-        if (mobileNumberRequiredLabel != null) mobileNumberRequiredLabel.gameObject.SetActive(false);
-        if (emailRequiredLabel != null) emailRequiredLabel.gameObject.SetActive(false);
-        if (companyNameRequiredLabel != null) companyNameRequiredLabel.gameObject.SetActive(false);
-        if (headOfficeLocationRequiredLabel != null) headOfficeLocationRequiredLabel.gameObject.SetActive(false);
-        if (projectNameRequiredLabel != null) projectNameRequiredLabel.gameObject.SetActive(false);
-        if (projectLocationRequiredLabel != null) projectLocationRequiredLabel.gameObject.SetActive(false);
-        if (accountTypeRequiredLabel != null) accountTypeRequiredLabel.gameObject.SetActive(false);
-        if (signatureRequiredLabel != null) signatureRequiredLabel.gameObject.SetActive(false);
-        if (applicationTypeRequiredLabel != null) applicationTypeRequiredLabel.gameObject.SetActive(false);
+        foreach (var mapping in fieldMappings)
+        {
+            if (mapping.requiredLabel != null)
+                mapping.requiredLabel.gameObject.SetActive(false);
+        }
     }
 
     // Email validation method
@@ -912,6 +874,33 @@ public class Registration : MonoBehaviour
             
         // Allow digits, spaces, hyphens, parentheses, and plus sign
         return System.Text.RegularExpressions.Regex.IsMatch(mobile, @"^[\d\s\-\(\)\+]+$") && mobile.Length >= 7;
+    }
+
+    // Helper methods for field management
+    public void AddFieldMapping(string fieldKey, string displayName, UIControlType controlType, bool isRequired = true)
+    {
+        var newMapping = new FieldMapping(fieldKey, displayName, controlType, isRequired);
+        fieldMappings.Add(newMapping);
+        
+        // Refresh CSV header
+        InitializeCsvHeader();
+        
+        Debug.Log($"Added field mapping: {fieldKey}");
+    }
+
+    public void RemoveFieldMapping(string fieldKey)
+    {
+        fieldMappings.RemoveAll(fm => fm.fieldKey == fieldKey);
+        
+        // Refresh CSV header
+        InitializeCsvHeader();
+        
+        Debug.Log($"Removed field mapping: {fieldKey}");
+    }
+
+    public FieldMapping GetFieldMapping(string fieldKey)
+    {
+        return fieldMappings.FirstOrDefault(fm => fm.fieldKey == fieldKey);
     }
 
     private void OnDestroy()
